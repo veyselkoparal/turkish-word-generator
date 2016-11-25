@@ -110,7 +110,7 @@ class Generator:
     def _apply_grammar(self):
         """Fixes grammar mistaken made by the generator. See rules.txt for 
         turkish grammar"""
-        
+        pass
 
 if __name__ == '__main__':
 
