@@ -1,0 +1,21 @@
+1. Letters n and b, cannot stand next to each other in form of 'nb' that part 
+of any word must automatically turned into 'mb' instead.
+
+(see: pembe)
+(see: bomba)
+
+2. Words cannot start with the letter Ğ.
+
+3. Turkish words must have vowel harmony
+
+(see: televizyon) This word is not Turkish (french origin) and we can 
+understand it from vowel harmony.
+After the 'e' (or 'i', which also breaks the rule) voice, the 'o' voice 
+arrives in a sequence. That is not a valid case in Turkish words.
+
+For further information, please go to the link below: 
+http://www.turkishclass.com/turkish_lesson_59
+
+4. We cannot have 2 consonants for words in size of 2 letters
+
+gr, ty, pz
