@@ -1,4 +1,5 @@
 import random
+import re
 
 
 class Generator:
@@ -7,13 +8,21 @@ class Generator:
 
         :type letter_dist: dict
         """
-        self.vowel_str = 'aeıioöuü'
+        self.hard_vowel_str = 'aıou'
+        self.soft_vowel_str = 'öüei'
+
         self.cons_str = 'rtypsdfghjklzcvbnmğşç'
-        self.vowels = [letter_dist[ch] for ch in self.vowel_str]
-        self.consonants = [letter_dist[ch] for ch in self.cons_str]
+
+        # get frequencies
+        self.vowel_freq = [letter_dist[ch] for ch in self.hard_vowel_str]
+        self.vowel_freq += [letter_dist[ch] for ch in self.soft_vowel_str]
+
+        self.cons_freq = [letter_dist[ch] for ch in self.cons_str]
 
         self.n_consonants = len(self.cons_str)
-        self.n_vowels = len(self.vowel_str)
+
+        # 4 in each set
+        self.n_vowels = 4
 
     def new_word(self):
         output = ''
@@ -22,12 +31,15 @@ class Generator:
         cons_by_now = 0
 
         word_len = random.randint(2, 10)
+        vowel_set = None
 
         # add initial letter by 50% chance
         starts_with_vowel = random.randint(0, 2) == 0
         if starts_with_vowel:
-            output += self._get_random_vowel()
+            ch = self._get_random_vowel()
+            output += ch
             vowels_by_now += 1
+            vowel_set = 'soft' if ch in self.soft_vowel_str else 'hard'
         else:
             output += self._get_random_consonant()
             cons_by_now += 1
@@ -40,26 +52,28 @@ class Generator:
                 ch = self._get_random_consonant()
             # if the last letter was a consonant
             else:
-                # if we have 1 consonant so far at the end of the word, it's optional to continue with a consonant
-                # or not
+                # if we have 1 consonant so far at the end of the word, it's 
+                # optional to continue with a consonant or not
                 if cons_by_now < 2:
-                    # TODO: Here, this can be provided to get a random value according to real words
+                    # TODO: Here, this can be provided to get a random value 
+                    # according to real words
                     continue_with_vowel = random.randint(0, 10) < 6
 
                     if continue_with_vowel:
-                        ch = self._get_random_vowel()
+                        ch = self._get_random_vowel(vowel_set=vowel_set)
                     else:
                         ch = self._get_random_consonant()
-                # but if we have 2, it's forbidden to add another consonant to the word, so we're adding a vowel to it
+                # but if we have 2, it's forbidden to add another consonant to 
+                # the word, so we're adding a vowel to it
                 else:
-                    ch = self._get_random_vowel()
+                    ch = self._get_random_vowel(vowel_set=vowel_set)
 
-            if ch in self.vowel_str:
-                vowels_by_now += 1
-                cons_by_now = 0
-            else:
+            if ch in self.cons_str:
                 vowels_by_now = 0
                 cons_by_now += 1
+            else:
+                vowels_by_now += 1
+                cons_by_now = 0
 
             output += ch
 
@@ -75,46 +89,28 @@ class Generator:
         while random_factor > 0.0:
             letter_roll = random.randint(0, self.n_consonants - 1)
 
-            random_factor -= self.consonants[letter_roll]
+            random_factor -= self.cons_freq[letter_roll]
 
         return self.cons_str[letter_roll]
 
-    def _get_random_vowel(self):
-        """get a random vowel"""
+    def _get_random_vowel(self, vowel_set=None):
+        """get a random vowel. If vowel_set is None, then return a complete 
+        random vowel. If specified as 'soft' or 'hard' return a suitable one"""
         random_factor = 100.0
         letter_roll = 0
-
+        vowels = self.soft_vowel_str if vowel_set == 'soft' \
+                                     else self.hard_vowel_str
         while random_factor > 0.0:
             letter_roll = random.randint(0, self.n_vowels - 1)
 
-            random_factor -= self.vowels[letter_roll]
+            random_factor -= self.vowel_freq[letter_roll]
 
-        return self.vowel_str[letter_roll]
-
-    def mutate_word(self, factor):
-        """Perform slight changes to given word and return it
-        :type factor: float between 0 and 1
-        """
-        pass
+        return vowels[letter_roll]
 
     def _apply_grammar(self):
-        """Turkish language, includes banned combinations of consonants and vowels.
-
-        1. Letters n and b cannot stand next to each other in form of 'nb' that part of any word must automatically
-        turned into 'mb' instead.
-
-        (see: pembe)
-        (see: bomba)
-
-        2. Words cannot start with the letter Ğ.
-
-        3. Turkish words must have vowel harmony
-
-        (see: televizyon) This word is not Turkish (french origin) and we can understand it from vowel harmony.
-        After the 'e' (or 'i', which also breaks the rule) voice, the 'o' voice arrives in a sequence. That is not a
-        valid case in Turkish words.
-        """
-        pass
+        """Fixes grammar mistaken made by the generator. See rules.txt for 
+        turkish grammar"""
+        
 
 if __name__ == '__main__':
 
@@ -151,4 +147,6 @@ if __name__ == '__main__':
         'ğ': 1.11
     }
     gen = Generator(frequencies)
-    print(gen.new_word())
+
+    for i in range(10):
+        print(gen.new_word())
